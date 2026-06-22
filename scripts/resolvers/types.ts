@@ -50,6 +50,10 @@ function buildHostPaths(): Record<string, HostPaths> {
 
 export const HOST_PATHS: Record<string, HostPaths> = buildHostPaths();
 
+export function shellRuntimePath(path: string): string {
+  return path.startsWith('$') ? path : `$HOME${path.replace(/^~/, '')}`;
+}
+
 import type { Model } from '../models';
 export type { Model } from '../models';
 

@@ -23,7 +23,7 @@ import {
   cursor,
   openclaw,
 } from '../hosts/index';
-import { HOST_PATHS } from '../scripts/resolvers/types';
+import { HOST_PATHS, shellRuntimePath } from '../scripts/resolvers/types';
 
 const ROOT = path.resolve(import.meta.dir, '..');
 
@@ -255,6 +255,13 @@ describe('HOST_PATHS derivation from configs', () => {
     expect(HOST_PATHS.codex.binDir).toBe('$GSTACK_BIN');
     expect(HOST_PATHS.codex.browseDir).toBe('$GSTACK_BROWSE');
     expect(HOST_PATHS.codex.designDir).toBe('$GSTACK_DESIGN');
+  });
+
+  test('shellRuntimePath does not prepend $HOME to env var paths', () => {
+    expect(shellRuntimePath('$GSTACK_BROWSE')).toBe('$GSTACK_BROWSE');
+    expect(shellRuntimePath('$GSTACK_DESIGN')).toBe('$GSTACK_DESIGN');
+    expect(shellRuntimePath('$GSTACK_MAKE_PDF')).toBe('$GSTACK_MAKE_PDF');
+    expect(shellRuntimePath('~/.codex/skills/gstack/browse/dist')).toBe('$HOME/.codex/skills/gstack/browse/dist');
   });
 
   test('every host with usesEnvVars=true gets env var paths', () => {
@@ -534,5 +541,14 @@ describe('host config correctness', () => {
       expect(config.runtimeRoot.globalSymlinks).toContain('bin');
       expect(config.runtimeRoot.globalSymlinks).toContain('ETHOS.md');
     }
+  });
+
+  test('Codex runtime exposes binary sidecars used by generated skills', () => {
+    expect(codex.runtimeRoot.globalSymlinks).toContain('browse/dist');
+    expect(codex.runtimeRoot.globalSymlinks).toContain('design/dist');
+    expect(codex.runtimeRoot.globalSymlinks).toContain('make-pdf/dist');
+    expect(codex.sidecar?.symlinks).toContain('browse');
+    expect(codex.sidecar?.symlinks).toContain('design');
+    expect(codex.sidecar?.symlinks).toContain('make-pdf');
   });
 });
